@@ -1,4 +1,5 @@
 const anchor = require("@project-serum/anchor");
+const assert = require("assert");
 
 const { SystemProgram } = anchor.web3;
 
@@ -6,7 +7,7 @@ describe("hello-anchor", () => {
   // Configure the client to use the local cluster.
   anchor.setProvider(anchor.Provider.env());
 
-  it("Is initialized!", async () => {
+  it("can increment gif count", async () => {
     // Create and set the provider. We set it before but we needed to update it, so that it can communicate with our frontend!
     const provider = anchor.Provider.env();
     anchor.setProvider(provider);
@@ -31,5 +32,17 @@ describe("hello-anchor", () => {
       baseAccount.publicKey
     );
     console.info("👀 GIF Count", account.totalGifs.toString());
+
+    // Call add_gif
+    await program.rpc.addGif({
+      accounts: {
+        baseAccount: baseAccount.publicKey,
+      },
+    });
+
+    // Get the account again and see what changed.
+    account = await program.account.baseAccount.fetch(baseAccount.publicKey);
+    console.info("👀 GIF Count", account.totalGifs.toString());
+    assert.equal(account.totalGifs.toNumber(), 1);
   });
 });
